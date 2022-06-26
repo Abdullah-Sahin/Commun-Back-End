@@ -1,4 +1,4 @@
-package Commun.Commun.Requests;
+package Commun.Commun.Requests.PostUpdateRequests;
 
 import lombok.Data;
 

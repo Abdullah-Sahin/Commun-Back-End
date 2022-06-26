@@ -1,6 +1,9 @@
 package Commun.Commun.Controllers;
 
+import Commun.Commun.CustomExceptions.InvalidDeadlineException;
+import Commun.Commun.CustomExceptions.UserNotFoundException;
 import Commun.Commun.Models.Post;
+import Commun.Commun.Requests.CreatePostRequest;
 import Commun.Commun.Services.PostServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +38,7 @@ public class PostController {
     }
 
     @PostMapping
-    public Post addPost(@RequestBody Post post){
+    public Post addPost(@RequestBody CreatePostRequest post) throws UserNotFoundException, InvalidDeadlineException {
         return postServices.addPost(post);
     }
 

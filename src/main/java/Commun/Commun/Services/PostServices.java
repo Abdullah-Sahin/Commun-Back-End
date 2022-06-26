@@ -1,10 +1,16 @@
 package Commun.Commun.Services;
 
+import Commun.Commun.CustomExceptions.InvalidDeadlineException;
+import Commun.Commun.CustomExceptions.UserNotFoundException;
+import Commun.Commun.Models.User;
 import Commun.Commun.Repos.PostRepository;
 import Commun.Commun.Models.Post;
+import Commun.Commun.Repos.UserRepository;
+import Commun.Commun.Requests.CreatePostRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,10 +18,12 @@ import java.util.Optional;
 public class PostServices {
 
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public PostServices(PostRepository postRepository) {
+    public PostServices(PostRepository postRepository, UserRepository userRepository) {
         this.postRepository = postRepository;
+        this.userRepository = userRepository;
     }
 
     public List<Post> getPosts(Optional<Long> posterId,
@@ -179,8 +187,27 @@ public class PostServices {
     }
 
 
-    public Post addPost(Post post){
-        return postRepository.save(post);
+    public Post addPost(CreatePostRequest post) throws InvalidDeadlineException, UserNotFoundException {
+        Post newPost = new Post();
+        Optional<User> poster = userRepository.findById(post.getPosterId());
+        if(poster.isPresent()){
+            if(post.getDeadline().isAfter(LocalDateTime.now().plusMinutes(90))) {
+                newPost.setPoster(poster.get());
+                newPost.setTitle(post.getTitle());
+                newPost.setRequest(post.getRequest());
+                newPost.setDeadline(post.getDeadline());
+                newPost.setLocation(post.getLocation());
+                newPost.setReward(post.getReward());
+                newPost.setClaimed(false);
+                newPost.setClaimer(null);
+                newPost.setCompleted(false);
+                return newPost;
+            }
+            else{
+                throw new InvalidDeadlineException();
+            }
+        }
+        throw new UserNotFoundException();
     }
 
     public Post updatePostById(Long id, Post newPost){
